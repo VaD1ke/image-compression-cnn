@@ -2,6 +2,7 @@
 
 import os
 import pandas as pd
+from params import TrainingParams, HyperParams, CNNParams  
 
 tparam = TrainingParams(verbose=False)
 

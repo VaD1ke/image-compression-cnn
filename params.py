@@ -22,6 +22,7 @@ class HyperParams() :
         
 class TrainingParams():
     def __init__(self, verbose):
+        self.images             = './images_learning/'
         self.model_path         = './models/'
         self.num_epochs         = 200
         self.learning_rate      = 0.002
