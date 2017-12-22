@@ -11,9 +11,14 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-image'            , type=str , default= 'image.png')
 parser.add_argument('-map'              , type=str , default= './output/msroi_map.jpg')
-parser.add_argument('-output_directory' , type=str , default= 'output')
+parser.add_argument('-output_directory' , type=str , default= './')
+parser.add_argument('-output_name'      , type=str , default= '')
 parser.add_argument('-modifier'         , type=str , default= '')
-parser.add_argument('-find_best'        , type=int , default=1)
+parser.add_argument('-find_best'        , type=int , default=0)
+
+# Save original compressed image and don't process further.
+# After some tests I research that it is the best compressing result
+parser.add_argument('-simple_compress'  , type=int , default=0) 
 
 # change the threshold % to 1, if doing metric comparison against standard JPEG. 
 # Images will have limited discernibility but fairer comparison against standard.
@@ -123,10 +128,15 @@ def make_quality_compression(original,sal):
                 k[i,j,l] = img_qualities[qq][i,j,l]
                 
 
-    # save the original file at the given quality level
-    compressed = args.output_directory + '/' + '_original_' + args.image.split('/')[-1] + '_' + str(args.jpeg_compression) + '.jpg'
-    original.save(compressed, quality=args.jpeg_compression)
-   
+    # save the original file at the given quality level   
+    if args.simple_compress:
+        compressed = args.output_directory + '/' + args.output_name;
+        original.save(compressed, quality=args.jpeg_compression)
+        return compressed, compressed
+    else:
+        compressed = args.output_directory + '/' + '_original_' + args.image.split('/')[-1] + '_' + str(args.jpeg_compression) + '.jpg'
+        original.save(compressed, quality=args.jpeg_compression)
+
     
     original_size = os.path.getsize(compressed)
     os.system('convert ' + args.image + " " + args.output_directory + '/temp.png')
@@ -136,7 +146,7 @@ def make_quality_compression(original,sal):
     out_img = array2PIL(k)
 
     if args.find_best:
-        out_name = args.output_directory + '/' + '_compressed_' + args.image.split('/')[-1] + '_' + '.jpg'
+        out_name = args.output_directory + '/' + (args.output_name if args.output_name else '_compressed_' + args.image.split('/')[-1] + '_' + '.jpg')
         for qual in xrange(90,20,-1):
             out_img.save(out_name, quality=qual)
             current_size = os.path.getsize(out_name)
@@ -152,7 +162,7 @@ def make_quality_compression(original,sal):
     else:
         final_quality = [100, 85, 65, 45]
         for fq in final_quality:
-            out_name = args.output_directory + '/' + args.modifier + args.image.split('/')[-1] + '_' + str(fq) + '.jpg'
+            out_name = args.output_directory + '/' + (args.output_name if args.output_name else args.modifier + args.image.split('/')[-1] + '_' + str(fq) + '.jpg')
             out_img.save(out_name, quality=fq)
     return compressed, out_name
 
